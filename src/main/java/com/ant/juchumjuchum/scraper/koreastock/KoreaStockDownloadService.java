@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -18,9 +19,10 @@ import org.springframework.stereotype.Service;
 public class KoreaStockDownloadService {
 
     private static final String BASE_DIR = "./";
-    private static final String MST_URL = "https://new.real.download.dws.co.kr/common/master/";
-
     private final CustomHttpConnection customHttpConnection;
+
+    @Value("${mst.url}")
+    private String MST_URL;
 
     public Optional<File> downloadStockInfo(String target) {
         String downloadZipFile = createDownloadZipFileName(target);
