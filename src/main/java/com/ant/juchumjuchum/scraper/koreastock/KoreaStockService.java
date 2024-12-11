@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,6 +26,8 @@ public class KoreaStockService {
     private final KoreaStockDownloadService koreaStockDownloadService;
     private final StockRepository stockRepository;
 
+    @Scheduled(cron = "0 9 * * 1-5")
+    @Scheduled(cron = "0 0 * * 1-5")
     @PostConstruct
     public void initStockInfo() {
         try {
