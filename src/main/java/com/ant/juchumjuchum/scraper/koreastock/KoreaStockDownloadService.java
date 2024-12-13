@@ -1,6 +1,7 @@
 package com.ant.juchumjuchum.scraper.koreastock;
 
 import com.ant.juchumjuchum.common.http.CustomHttpConnection;
+import com.ant.juchumjuchum.config.StockAccountProperties;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,7 +11,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -20,13 +20,11 @@ public class KoreaStockDownloadService {
 
     private static final String BASE_DIR = "./";
     private final CustomHttpConnection customHttpConnection;
-
-    @Value("${mst.url}")
-    private String MST_URL;
+    private final StockAccountProperties stockAccountProperties;
 
     public Optional<File> downloadStockInfo(String target) {
         String downloadZipFile = createDownloadZipFileName(target);
-        String downloadUrl = MST_URL + downloadZipFile;
+        String downloadUrl = stockAccountProperties.getMstUrl() + downloadZipFile;
         Path downloadZipFilePath = Path.of(BASE_DIR, downloadZipFile);
 
         try {
