@@ -26,8 +26,8 @@ public class KoreaStockService {
     private final KoreaStockDownloadService koreaStockDownloadService;
     private final StockRepository stockRepository;
 
-    @Scheduled(cron = "0 9 * * 1-5")
-    @Scheduled(cron = "0 0 * * 1-5")
+    @Scheduled(cron = "0 0 0 * * MON-FRI")
+    @Scheduled(cron = "0 0 9 * * MON-FRI")
     @PostConstruct
     public void initStockInfo() {
         try {
