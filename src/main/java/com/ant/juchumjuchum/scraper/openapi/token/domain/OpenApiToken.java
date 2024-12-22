@@ -1,5 +1,6 @@
 package com.ant.juchumjuchum.scraper.openapi.token.domain;
 
+import com.ant.juchumjuchum.scraper.openapi.token.dto.TokenResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,4 +25,9 @@ public class OpenApiToken {
 
     @Column(columnDefinition = "TIMESTAMP", name = "websocketKeyExpire")
     private LocalDateTime websocketKeyExpireAt;
+
+    public void updateToken(TokenResponse tokenResponse) {
+        this.token = tokenResponse.getAccessToken();
+        this.tokenExpireAt = tokenResponse.getAccessTokenTokenExpired();
+    }
 }
