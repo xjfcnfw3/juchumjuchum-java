@@ -14,13 +14,16 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class KoreaStockService {
     private final KoreaStockDownloadService koreaStockDownloadService;
@@ -30,17 +33,37 @@ public class KoreaStockService {
     @Scheduled(cron = "0 0 9 * * MON-FRI")
     @PostConstruct
     public void initStockInfo() {
-        try {
-            List<Stock> kosdaq = downloadKosdaq();
-            stockRepository.saveAll(kosdaq);
-            List<Stock> kospi = downloadKospi();
-            stockRepository.saveAll(kospi);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        initKosdaq();
+        initKospi();
     }
 
-    public List<Stock> downloadKosdaq() throws IOException {
+    private void initKosdaq() {
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                List<Stock> kosdaq = downloadKosdaq();
+                stockRepository.saveAll(kosdaq);
+                return 1;
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                return -1;
+            }
+        });
+    }
+
+    private void initKospi() {
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                List<Stock> kospi = downloadKospi();
+                stockRepository.saveAll(kospi);
+                return 1;
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                return -1;
+            }
+        });
+    }
+
+    private List<Stock> downloadKosdaq() throws IOException {
         Optional<File> kosdaq = koreaStockDownloadService.downloadStockInfo("kosdaq_code");
         kosdaq.ifPresent(file -> {
             unzipFile(file);
@@ -54,7 +77,7 @@ public class KoreaStockService {
         return stocks;
     }
 
-    public List<Stock> downloadKospi() throws IOException {
+    private List<Stock> downloadKospi() throws IOException {
         Optional<File> kospi = koreaStockDownloadService.downloadStockInfo("kospi_code");
         kospi.ifPresent(file -> {
             unzipFile(file);
