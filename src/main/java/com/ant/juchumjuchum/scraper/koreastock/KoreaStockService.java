@@ -3,20 +3,17 @@ package com.ant.juchumjuchum.scraper.koreastock;
 
 import com.ant.juchumjuchum.stock.StockRepository;
 import com.ant.juchumjuchum.stock.domain.Stock;
+import com.ant.juchumjuchum.utils.FileUtil;
 import jakarta.annotation.PostConstruct;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -66,7 +63,7 @@ public class KoreaStockService {
     private List<Stock> downloadKosdaq() throws IOException {
         Optional<File> kosdaq = koreaStockDownloadService.downloadStockInfo("kosdaq_code");
         kosdaq.ifPresent(file -> {
-            unzipFile(file);
+            FileUtil.unzipFile(file);
             file.delete();
         });
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
@@ -80,7 +77,7 @@ public class KoreaStockService {
     private List<Stock> downloadKospi() throws IOException {
         Optional<File> kospi = koreaStockDownloadService.downloadStockInfo("kospi_code");
         kospi.ifPresent(file -> {
-            unzipFile(file);
+            FileUtil.unzipFile(file);
             file.delete();
         });
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
@@ -120,25 +117,5 @@ public class KoreaStockService {
         }
         bufferedReader.close();
         return stocks;
-    }
-
-    private void unzipFile(File file) {
-        try {
-            ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file));
-            ZipEntry zipEntry;
-            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                int length;
-                BufferedOutputStream out = new BufferedOutputStream(
-                        new FileOutputStream("./" + zipEntry.getName()));
-                while ((length = zipInputStream.read()) != -1) {
-                    out.write(length);
-                }
-                zipInputStream.closeEntry();
-                out.close();
-            }
-            zipInputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
