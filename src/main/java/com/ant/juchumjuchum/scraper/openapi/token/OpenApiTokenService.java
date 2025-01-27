@@ -46,43 +46,43 @@ public class OpenApiTokenService {
             throws IOException, URISyntaxException, InterruptedException {
         openApiAccountInfos = new ArrayList<>();
         for (StockAccount stockAccount : stockAccountProperties.getAccounts()) {
-            Map<String, String> body = Map.of(
-                    "grant_type", "client_credentials",
-                    "appsecret", stockAccount.getPassword(),
-                    "appkey", stockAccount.getKey()
-            );
             Optional<OpenApiToken> token = tokenRepository.findById(stockAccount.getAccount());
+            OpenApiToken openApiToken;
             if (token.isPresent()) {
-                OpenApiToken openApiToken = token.get();
+                openApiToken = token.get();
 
                 if (openApiToken.isExpiredToken()) {
-                    TokenResponse result = (TokenResponse) customHttpConnection.postRequest(
-                            stockAccountProperties.getOpenApiUrl() + "/oauth2/tokenP",
-                            body, TokenResponse.class);
-                    openApiToken.updateToken(result);
-                    tokenRepository.save(openApiToken);
+                    renewToken(stockAccountProperties, stockAccount, openApiToken);
                 }
 
-                OpenApiAccountInfo openApiAccountInfo = OpenApiAccountInfo.builder()
-                        .stockAccount(stockAccount)
-                        .openApiToken(openApiToken)
-                        .build();
-                openApiAccountInfos.add(openApiAccountInfo);
             } else {
-                OpenApiToken openApiToken = OpenApiToken.builder()
+                openApiToken = OpenApiToken.builder()
                         .account(stockAccount.getAccount())
                         .build();
-                TokenResponse result = (TokenResponse) customHttpConnection.postRequest(
-                        stockAccountProperties.getOpenApiUrl() + "/oauth2/tokenP",
-                        body, TokenResponse.class);
-                openApiToken.updateToken(result);
-                tokenRepository.save(openApiToken);
-                OpenApiAccountInfo openApiAccountInfo = OpenApiAccountInfo.builder()
-                        .stockAccount(stockAccount)
-                        .openApiToken(openApiToken)
-                        .build();
-                openApiAccountInfos.add(openApiAccountInfo);
+                renewToken(stockAccountProperties, stockAccount, openApiToken);
             }
+            OpenApiAccountInfo openApiAccountInfo = new OpenApiAccountInfo(stockAccount, openApiToken);
+            openApiAccountInfos.add(openApiAccountInfo);
         }
+    }
+
+    private void renewToken(StockAccountProperties stockAccountProperties, StockAccount stockAccount,
+                            OpenApiToken openApiToken) throws IOException, URISyntaxException, InterruptedException {
+        receiveApiToken(stockAccountProperties, stockAccount, openApiToken);
+        tokenRepository.save(openApiToken);
+    }
+
+    private void receiveApiToken(StockAccountProperties stockAccountProperties, StockAccount stockAccount,
+                                 OpenApiToken openApiToken)
+            throws IOException, URISyntaxException, InterruptedException {
+        Map<String, String> body = Map.of(
+                "grant_type", "client_credentials",
+                "appsecret", stockAccount.getPassword(),
+                "appkey", stockAccount.getKey()
+        );
+        TokenResponse result = (TokenResponse) customHttpConnection.postRequest(
+                stockAccountProperties.getOpenApiUrl() + "/oauth2/tokenP",
+                body, TokenResponse.class);
+        openApiToken.updateToken(result);
     }
 }
