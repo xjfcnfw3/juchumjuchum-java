@@ -36,4 +36,12 @@ public class OpenApiToken {
         this.token = tokenResponse.getAccessToken();
         this.tokenExpireAt = tokenResponse.getAccessTokenTokenExpired();
     }
+
+    public boolean isExpiredToken() {
+        return LocalDateTime.now().isAfter(this.tokenExpireAt);
+    }
+
+    public boolean isExpiredWSToken() {
+        return LocalDateTime.now().isAfter(this.websocketKeyExpireAt);
+    }
 }
