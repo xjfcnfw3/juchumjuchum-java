@@ -9,9 +9,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "stock")
 public class StockAccountProperties {
-    private List<Long> accounts;
-    private List<String> passwords;
-    private List<String> keys;
+    private List<StockAccount> accounts;
     private String openApiUrl;
     private String mstUrl;
+
+    public boolean isEmpty() {
+        return accounts.isEmpty();
+    }
 }

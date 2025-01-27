@@ -1,5 +1,6 @@
 package com.ant.juchumjuchum.scraper.openapi.token.domain;
 
+import com.ant.juchumjuchum.config.StockAccount;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,8 +10,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class OpenApiAccountInfo {
-    private Long account;
-    private String password;
-    private String key;
+    private StockAccount stockAccount;
     private OpenApiToken openApiToken;
 }

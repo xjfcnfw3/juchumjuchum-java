@@ -1,6 +1,7 @@
 package com.ant.juchumjuchum.scraper.openapi.token;
 
 import com.ant.juchumjuchum.common.http.CustomHttpConnection;
+import com.ant.juchumjuchum.config.StockAccount;
 import com.ant.juchumjuchum.config.StockAccountProperties;
 import com.ant.juchumjuchum.scraper.openapi.token.domain.OpenApiAccountInfo;
 import com.ant.juchumjuchum.scraper.openapi.token.domain.OpenApiToken;
@@ -17,8 +18,6 @@ import org.springframework.stereotype.Service;
 @Getter
 @Service
 public class OpenApiTokenService {
-
-    private final StockAccountProperties stockAccountProperties;
     private final CustomHttpConnection customHttpConnection;
     private final TokenApiTokenRepository tokenRepository;
 
@@ -28,17 +27,13 @@ public class OpenApiTokenService {
                                CustomHttpConnection customHttpConnection,
                                TokenApiTokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
-        this.stockAccountProperties = stockAccountProperties;
         this.customHttpConnection = customHttpConnection;
+        List<StockAccount> accounts = stockAccountProperties.getAccounts();
 
-        if (stockAccountProperties.getAccounts().isEmpty()) {
+        if (accounts.isEmpty()) {
             throw new IllegalArgumentException("The number of accounts must be at least one.");
         }
 
-        if (stockAccountProperties.getAccounts().size() != stockAccountProperties.getPasswords().size() ||
-                stockAccountProperties.getAccounts().size() != stockAccountProperties.getKeys().size()) {
-            throw new IllegalArgumentException("The number of accounts, passwords, and keys must be the same.");
-        }
         try {
             init(stockAccountProperties);
         } catch (IOException | URISyntaxException | InterruptedException e) {
@@ -50,16 +45,13 @@ public class OpenApiTokenService {
     private void init(StockAccountProperties stockAccountProperties)
             throws IOException, URISyntaxException, InterruptedException {
         openApiAccountInfos = new ArrayList<>();
-        for (int i = 0; i < stockAccountProperties.getAccounts().size(); i++) {
-            Long account = stockAccountProperties.getAccounts().get(i);
-            String password = stockAccountProperties.getPasswords().get(i);
-            String key = stockAccountProperties.getKeys().get(i);
+        for (StockAccount stockAccount : stockAccountProperties.getAccounts()) {
             Map<String, String> body = Map.of(
                     "grant_type", "client_credentials",
-                    "appsecret", password,
-                    "appkey", key
+                    "appsecret", stockAccount.getPassword(),
+                    "appkey", stockAccount.getKey()
             );
-            Optional<OpenApiToken> token = tokenRepository.findById(account);
+            Optional<OpenApiToken> token = tokenRepository.findById(stockAccount.getAccount());
             if (token.isPresent()) {
                 OpenApiToken openApiToken = token.get();
 
@@ -72,15 +64,13 @@ public class OpenApiTokenService {
                 }
 
                 OpenApiAccountInfo openApiAccountInfo = OpenApiAccountInfo.builder()
-                        .account(account)
-                        .password(password)
-                        .key(key)
+                        .stockAccount(stockAccount)
                         .openApiToken(openApiToken)
                         .build();
                 openApiAccountInfos.add(openApiAccountInfo);
             } else {
                 OpenApiToken openApiToken = OpenApiToken.builder()
-                        .account(account)
+                        .account(stockAccount.getAccount())
                         .build();
                 TokenResponse result = (TokenResponse) customHttpConnection.postRequest(
                         stockAccountProperties.getOpenApiUrl() + "/oauth2/tokenP",
@@ -88,9 +78,7 @@ public class OpenApiTokenService {
                 openApiToken.updateToken(result);
                 tokenRepository.save(openApiToken);
                 OpenApiAccountInfo openApiAccountInfo = OpenApiAccountInfo.builder()
-                        .account(account)
-                        .password(password)
-                        .key(key)
+                        .stockAccount(stockAccount)
                         .openApiToken(openApiToken)
                         .build();
                 openApiAccountInfos.add(openApiAccountInfo);
