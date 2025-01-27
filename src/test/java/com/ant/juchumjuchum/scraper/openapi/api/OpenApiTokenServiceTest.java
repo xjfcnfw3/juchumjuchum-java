@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.ant.juchumjuchum.common.http.CustomHttpConnection;
+import com.ant.juchumjuchum.config.StockAccount;
 import com.ant.juchumjuchum.config.StockAccountProperties;
 import com.ant.juchumjuchum.scraper.openapi.token.OpenApiTokenService;
 import com.ant.juchumjuchum.scraper.openapi.token.TokenApiTokenRepository;
@@ -61,52 +62,29 @@ class OpenApiTokenServiceTest {
     }
 
     @Test
-    @DisplayName("계좌 개수와 비밀번호 개수가 다를 때 예외 발생")
-    void differentSizeAccountAndPassword() {
-        when(stockAccountProperties.getAccounts()).thenReturn(List.of(1L, 2L, 3L));
-        when(stockAccountProperties.getPasswords()).thenReturn(List.of("a", "b"));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new OpenApiTokenService(stockAccountProperties, customHttpConnection, tokenRepository));
-    }
-
-    @Test
-    @DisplayName("계좌 개수와 비밀번호 개수가 다를 때 예외 발생")
-    void differentSizePasswordAndKeys() {
-        when(stockAccountProperties.getAccounts()).thenReturn(List.of(1L, 2L, 3L));
-        when(stockAccountProperties.getPasswords()).thenReturn(List.of("a", "b", "c"));
-        when(stockAccountProperties.getKeys()).thenReturn(List.of("d", "e"));
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new OpenApiTokenService(stockAccountProperties, customHttpConnection, tokenRepository));
-    }
-
-    @Test
     @DisplayName("계좌 정보 초기화")
     void initAccount() throws IOException, URISyntaxException, InterruptedException {
-        when(stockAccountProperties.getAccounts()).thenReturn(List.of(1L, 2L, 3L));
-        when(stockAccountProperties.getPasswords()).thenReturn(List.of("a", "b", "c"));
-        when(stockAccountProperties.getKeys()).thenReturn(List.of("d", "e", "f"));
+        StockAccount stockAccount1 = new StockAccount(1L, "a", "b");
+        StockAccount stockAccount2 = new StockAccount(2L, "b", "e");
+        StockAccount stockAccount3 = new StockAccount(3L, "c", "f");
+        List<StockAccount> accounts = List.of(stockAccount1, stockAccount2, stockAccount3);
+        when(stockAccountProperties.getAccounts()).thenReturn(accounts);
         when(customHttpConnection.postRequest(anyString(), any(), any()))
                 .thenReturn(tokenResponse);
         OpenApiTokenService openApiTokenService = new OpenApiTokenService(stockAccountProperties, customHttpConnection,
                 tokenRepository);
 
         List<OpenApiAccountInfo> accountInfos = openApiTokenService.getOpenApiAccountInfos();
+        List<StockAccount> stockAccounts = accountInfos.stream().map(OpenApiAccountInfo::getStockAccount).toList();
 
-        for (int i = 0; i < accountInfos.size(); i++) {
-            assertThat(accountInfos.get(i).getAccount()).isEqualTo(i + 1);
-            assertThat(accountInfos.get(i).getPassword()).isEqualTo(String.valueOf((char) ('a' + i)));
-            assertThat(accountInfos.get(i).getKey()).isEqualTo(String.valueOf((char) ('d' + i)));
-        }
+        assertThat(stockAccounts).isEqualTo(accounts);
     }
 
     @Test
     @DisplayName("계좌 토큰 요청")
     void initAccountToken() throws IOException, URISyntaxException, InterruptedException {
-        when(stockAccountProperties.getAccounts()).thenReturn(List.of(1L));
-        when(stockAccountProperties.getPasswords()).thenReturn(List.of("a"));
-        when(stockAccountProperties.getKeys()).thenReturn(List.of("b"));
+        StockAccount stockAccount = new StockAccount(1L, "a", "b");
+        when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
         when(customHttpConnection.postRequest(anyString(), any(), any()))
                 .thenReturn(tokenResponse);
         OpenApiTokenService openApiTokenService = new OpenApiTokenService(stockAccountProperties, customHttpConnection,
@@ -123,9 +101,8 @@ class OpenApiTokenServiceTest {
     @Test
     @DisplayName("계좌 정보가 비어있을 때 토큰 요청")
     void initBlankAccountToken() throws IOException, URISyntaxException, InterruptedException {
-        when(stockAccountProperties.getAccounts()).thenReturn(List.of(1L));
-        when(stockAccountProperties.getPasswords()).thenReturn(List.of("a"));
-        when(stockAccountProperties.getKeys()).thenReturn(List.of("b"));
+        StockAccount stockAccount = new StockAccount(1L, "a", "b");
+        when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
         when(customHttpConnection.postRequest(anyString(), any(), any()))
                 .thenReturn(tokenResponse);
         when(tokenRepository.findById(any())).thenReturn(Optional.empty());
@@ -138,9 +115,8 @@ class OpenApiTokenServiceTest {
     @Test
     @DisplayName("계좌 정보가 만료되었을 때 토큰 요청")
     void initExpiredAccountToken() throws IOException, URISyntaxException, InterruptedException {
-        when(stockAccountProperties.getAccounts()).thenReturn(List.of(1L));
-        when(stockAccountProperties.getPasswords()).thenReturn(List.of("a"));
-        when(stockAccountProperties.getKeys()).thenReturn(List.of("b"));
+        StockAccount stockAccount = new StockAccount(1L, "a", "b");
+        when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
         OpenApiToken mockToken = mock(OpenApiToken.class);
         when(mockToken.isExpiredToken()).thenReturn(true);
         when(tokenRepository.findById(any())).thenReturn(Optional.of(mockToken));
@@ -154,9 +130,8 @@ class OpenApiTokenServiceTest {
     @Test
     @DisplayName("이미 정보가 존재하면 요청하지 않음")
     void initExistAccountToken() throws IOException, URISyntaxException, InterruptedException {
-        when(stockAccountProperties.getAccounts()).thenReturn(List.of(1L));
-        when(stockAccountProperties.getPasswords()).thenReturn(List.of("a"));
-        when(stockAccountProperties.getKeys()).thenReturn(List.of("b"));
+        StockAccount stockAccount = new StockAccount(1L, "a", "b");
+        when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
         OpenApiToken mockToken = mock(OpenApiToken.class);
         when(mockToken.isExpiredToken()).thenReturn(false);
         when(tokenRepository.findById(any())).thenReturn(Optional.of(mockToken));
