@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.ant.juchumjuchum.common.http.CustomHttpConnection;
+import com.ant.juchumjuchum.config.StockAccountProperties;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -26,6 +27,9 @@ class KoreaStockDownloadServiceTest {
 
     @Mock
     private CustomHttpConnection connection;
+
+    @Mock
+    private StockAccountProperties stockAccountProperties;
 
     @InjectMocks
     private KoreaStockDownloadService koreaStockDownloadService;
