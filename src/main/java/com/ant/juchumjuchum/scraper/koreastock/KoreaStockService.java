@@ -60,7 +60,7 @@ public class KoreaStockService {
         });
     }
 
-    private List<Stock> downloadKosdaq() throws IOException {
+    List<Stock> downloadKosdaq() throws IOException {
         Optional<File> kosdaq = koreaStockDownloadService.downloadStockInfo("kosdaq_code");
         kosdaq.ifPresent(file -> {
             FileUtil.unzipFile(file);
@@ -74,7 +74,7 @@ public class KoreaStockService {
         return stocks;
     }
 
-    private List<Stock> downloadKospi() throws IOException {
+    public List<Stock> downloadKospi() throws IOException {
         Optional<File> kospi = koreaStockDownloadService.downloadStockInfo("kospi_code");
         kospi.ifPresent(file -> {
             FileUtil.unzipFile(file);
@@ -95,7 +95,7 @@ public class KoreaStockService {
             Stock stock = Stock.builder()
                     .id(line.substring(0, 9).trim())
                     .name(line.substring(21, line.length() - 221).trim())
-                    .group(line.substring(line.length() - 221, line.length() - 220).trim())
+                    .group(line.substring(line.length() - 221, line.length() - 219).trim())
                     .build();
             stocks.add(stock);
         }
