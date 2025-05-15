@@ -18,10 +18,48 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class ParserTest {
 
+    @ParameterizedTest
+    @DisplayName("코스피 파일")
+    @MethodSource("kospiLineAndStock")
+    void parseKospi(String line, Stock stock) {
+        Parser parser = new KospiParser();
+
+        Stock result = parser.parse(line);
+
+        assertThat(result.getId()).isEqualTo(stock.getId());
+        assertThat(result.getGroup()).isEqualTo(stock.getGroup());
+        assertThat(result.getName()).isEqualTo(stock.getName());
+    }
+
+
+    @ParameterizedTest
+    @DisplayName("코스닥 파일")
+    @MethodSource("kosdaqLineAndStock")
+    void parseKosdaq(String line, Stock stock) {
+        Parser parser = new KosdaqParser();
+
+        Stock result = parser.parse(line);
+
+        assertThat(result.getId()).isEqualTo(stock.getId());
+        assertThat(result.getGroup()).isEqualTo(stock.getGroup());
+        assertThat(result.getName()).isEqualTo(stock.getName());
+    }
+
+    static Stream<Arguments> kosdaqLineAndStock() throws IOException {
+        List<String> inputs = Files.readAllLines(Paths.get("src/test/resources/test-kosdaq-inputs.txt"));
+        List<String> outputs = Files.readAllLines(Paths.get("src/test/resources/test-kosdaq-outputs.txt"));
+
+        return convertToArguments(inputs, outputs);
+    }
+
     static Stream<Arguments> kospiLineAndStock() throws IOException {
         List<String> inputs = Files.readAllLines(Paths.get("src/test/resources/test-kospi-inputs.txt"));
         List<String> outputs = Files.readAllLines(Paths.get("src/test/resources/test-kospi-outputs.txt"));
 
+        return convertToArguments(inputs, outputs);
+    }
+
+    private static Stream<Arguments> convertToArguments(List<String> inputs, List<String> outputs) {
         return IntStream.range(0, inputs.size())
                 .mapToObj(i -> {
                     String input = inputs.get(i);
@@ -38,18 +76,5 @@ class ParserTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    @ParameterizedTest
-    @DisplayName("코스피 파일")
-    @MethodSource("kospiLineAndStock")
-    void parseKospi(String line, Stock stock) {
-        Parser parser = new KospiParser();
-
-        Stock result = parser.parse(line);
-
-        assertThat(result.getId()).isEqualTo(stock.getId());
-        assertThat(result.getGroup()).isEqualTo(stock.getGroup());
-        assertThat(result.getName()).isEqualTo(stock.getName());
     }
 }
