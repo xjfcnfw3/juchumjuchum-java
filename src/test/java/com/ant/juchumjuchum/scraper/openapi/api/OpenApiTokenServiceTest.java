@@ -53,7 +53,7 @@ class OpenApiTokenServiceTest {
     private TokenApiTokenRepository tokenRepository;
 
     @Test
-    @DisplayName("°èÁÂ Á¤º¸°¡ ºñ¾îÀÖÀ» ¶§ ¿¹¿Ü ¹ß»ı")
+    @DisplayName("ê³„ì¢Œ ì •ë³´ê°€ ë¹„ì–´ìˆì„ ë•Œ ì˜ˆì™¸ ë°œìƒ")
     void emptyAccounts() {
         when(stockAccountProperties.getAccounts()).thenReturn(new ArrayList<>());
 
@@ -62,7 +62,7 @@ class OpenApiTokenServiceTest {
     }
 
     @Test
-    @DisplayName("°èÁÂ Á¤º¸ ÃÊ±âÈ­")
+    @DisplayName("ê³„ì¢Œ ì •ë³´ ì´ˆê¸°í™”")
     void initAccount() throws IOException, URISyntaxException, InterruptedException {
         StockAccount stockAccount1 = new StockAccount(1L, "a", "b");
         StockAccount stockAccount2 = new StockAccount(2L, "b", "e");
@@ -81,7 +81,7 @@ class OpenApiTokenServiceTest {
     }
 
     @Test
-    @DisplayName("°èÁÂ ÅäÅ« ¿äÃ»")
+    @DisplayName("ê³„ì¢Œ í† í° ìš”ì²­")
     void initAccountToken() throws IOException, URISyntaxException, InterruptedException {
         StockAccount stockAccount = new StockAccount(1L, "a", "b");
         when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
@@ -99,7 +99,7 @@ class OpenApiTokenServiceTest {
     }
 
     @Test
-    @DisplayName("°èÁÂ Á¤º¸°¡ ºñ¾îÀÖÀ» ¶§ ÅäÅ« ¿äÃ»")
+    @DisplayName("ê³„ì¢Œ ì •ë³´ê°€ ë¹„ì–´ìˆì„ ë•Œ í† í° ìš”ì²­")
     void initBlankAccountToken() throws IOException, URISyntaxException, InterruptedException {
         StockAccount stockAccount = new StockAccount(1L, "a", "b");
         when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
@@ -113,7 +113,7 @@ class OpenApiTokenServiceTest {
     }
 
     @Test
-    @DisplayName("°èÁÂ Á¤º¸°¡ ¸¸·áµÇ¾úÀ» ¶§ ÅäÅ« ¿äÃ»")
+    @DisplayName("ê³„ì¢Œ ì •ë³´ê°€ ë§Œë£Œë˜ì—ˆì„ ë•Œ í† í° ìš”ì²­")
     void initExpiredAccountToken() throws IOException, URISyntaxException, InterruptedException {
         StockAccount stockAccount = new StockAccount(1L, "a", "b");
         when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
@@ -128,7 +128,7 @@ class OpenApiTokenServiceTest {
     }
 
     @Test
-    @DisplayName("ÀÌ¹Ì Á¤º¸°¡ Á¸ÀçÇÏ¸é ¿äÃ»ÇÏÁö ¾ÊÀ½")
+    @DisplayName("ì´ë¯¸ ì •ë³´ê°€ ì¡´ì¬í•˜ë©´ ìš”ì²­í•˜ì§€ ì•ŠìŒ")
     void initExistAccountToken() throws IOException, URISyntaxException, InterruptedException {
         StockAccount stockAccount = new StockAccount(1L, "a", "b");
         when(stockAccountProperties.getAccounts()).thenReturn(List.of(stockAccount));
