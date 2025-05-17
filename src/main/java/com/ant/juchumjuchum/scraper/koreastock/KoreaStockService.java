@@ -9,7 +9,6 @@ import com.ant.juchumjuchum.scraper.koreastock.file.StockFileReader;
 import com.ant.juchumjuchum.stock.StockRepository;
 import com.ant.juchumjuchum.stock.domain.Stock;
 import com.ant.juchumjuchum.utils.FileUtil;
-import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,9 +27,6 @@ public class KoreaStockService {
     private final KoreaStockDownloadService koreaStockDownloadService;
     private final StockRepository stockRepository;
 
-    @Scheduled(cron = "0 0 0 * * MON-FRI")
-    @Scheduled(cron = "0 0 9 * * MON-FRI")
-    @PostConstruct
     public CompletableFuture<Integer> initKosdaq() {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -45,10 +40,6 @@ public class KoreaStockService {
         });
     }
 
-
-    @Scheduled(cron = "0 0 0 * * MON-FRI")
-    @Scheduled(cron = "0 0 9 * * MON-FRI")
-    @PostConstruct
     public CompletableFuture<Integer> initKospi() {
         return CompletableFuture.supplyAsync(() -> {
             try {
